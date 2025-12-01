@@ -1,0 +1,33 @@
+{
+	"name": "express-train",
+	"version": "1.0.0",
+	"description": "We build innovation that take you around the world",
+	"repository": {
+		"type": "git",
+		"url": "Express-Train"
+	},
+	"license": "ISC",
+	"author": "Jeffery",
+	"type": "commonjs",
+	"main": "index.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start:dev": "concurrently \"tsc -w\" \"nodemon dist/server.js\"",
+		"start:build": "rimraf dist && tsc",
+		"start:prod": "NODE_ENV=production node dist/index.js",
+		"lint-format": "biome check --write"
+	},
+	"dependencies": {
+		"@types/express": "^5.0.5",
+		"@types/node": "^24.10.1",
+		"concurrently": "^9.2.1",
+		"dotenv": "^17.2.3",
+		"express": "^5.1.0",
+		"nodemon": "^3.1.11",
+		"rimraf": "^6.1.2",
+		"typescript": "^5.9.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.8"
+	}
+}

@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema<IUserCreate>({
     type: String,
     required: [true, "Please confirm your password for validation"], 
     validate: {
-      validator: function (this: HydratedDocument<User>, data: string) {
+      validator: function (this: HydratedDocument<IUserCreate>, data: string) {
         return data === this.password;
       },
 	  message: "Passwords are not the same!"

@@ -2,9 +2,9 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "./../config.env" });
 
-import express, { type Request, type Response } from "express";
-import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
+import express, { type Request, type Response } from "express";
 import dbConnection from "./Db/dbConnect";
 import userRouter from "./routes/userRoutes";
 

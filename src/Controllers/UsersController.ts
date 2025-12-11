@@ -1,8 +1,24 @@
 import type { Request, Response } from "express";
 import Users from "../Models/Users";
+import jwt from "jsonwebtoken";
+import { Types } from "mongoose";
+import { handleAsyncErr } from "../Utils/AsyncError";
 
-export const createUser = async (req: Request, res: Response) => {
-	try {
+const createToken = (id: Types.ObjectId) => {
+	if(process.env.JWT_SECRET && process.env.JWT_EXPIRE_DATE) {
+			// The VAR keyword was use here to make sure the variable can be used outside the if/else blocks
+			var jwtSecret: string | object = process.env.JWT_SECRET;
+			var jwtDate: number | string = process.env.JWT_EXPIRE_DATE;
+			var signupToken = jwt.sign({id}, jwtSecret, {
+				expiresIn: +jwtDate
+			});
+			return signupToken;
+		} else {
+			throw new Error("Server error, something went wrong on our side. get back to you");
+	}
+}
+
+export const createUser = handleAsyncErr(async (req: Request, res: Response) => {
 		//This locals data is accessible everywhere across all chained request sent to the same endpoints
 		const [
 			name,
@@ -21,23 +37,17 @@ export const createUser = async (req: Request, res: Response) => {
 			passwordConfirm,
 		});
 
-		res.status(200).json({
+		const signupToken: string | Types.ObjectId = createToken(newUser._id);
+
+		res.status(201).json({
 			Status: "success",
+			auth: signupToken,
 			data: newUser,
 		});
 		return;
-	} catch (error) {
-		console.log(error);
-		res.status(404).json({
-			Status: "failed",
-			data: error,
-		});
-		return;
-	}
-};
+});
 
-export async function getCurrentUser(req: Request, res: Response) {
-	try {
+export const getCurrentUser = handleAsyncErr(async(req: Request, res: Response) => {
 		const [email, password]: Array<string> = res.locals.loginData;
 		const findUser = await Users.findOne({
 			email,
@@ -47,23 +57,14 @@ export async function getCurrentUser(req: Request, res: Response) {
 			!findUser ||
 			!(await findUser.compareLoginPassword(password, findUser.password))
 		) {
-			res
-				.status(404)
-				.json({ status: "failed", message: "No user with such Info" });
-			return;
+			throw new Error("Wrong Info. no such user found");
 		}
-		res.status(200).json({
+
+		const signupToken: string | Types.ObjectId = createToken(findUser._id);
+
+		res.status(201).json({
+			auth: signupToken,
 			data: findUser,
 		});
 		return;
-	} catch (error) {
-		//Adding any as the type works in development but it would be advisable to make some adjustment for important error incoming
-		console.log(error);
-		res.status(500).json({
-			status: "failed",
-			message: "Server error",
-		});
-		console.log(error);
-		return;
-	}
-}
+	});

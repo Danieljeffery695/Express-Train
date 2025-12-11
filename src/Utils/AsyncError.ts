@@ -1,14 +1,12 @@
-import {Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 
 export const handleAsyncErr = (fn: Function) => {
-        return (err: any, req: Request, res: Response, next: NextFunction) => {
-            err.message = err.message || "Server Errors";
-            err.responseMsg = err.responseMsg || "Please standby we're working on the issues. Thanks for your Patience..!!!";
-            err.statusCode = err.statusCode || 500;
-            Promise.resolve(fn(req, res, next)).catch((error: Error) => res.status(err.statusCode).json({
-                Status: "Failed",
-                Message: err.message,
-                Causes: err.responseMsg
-            }));
+    return (req: Request, res: Response, next: NextFunction) => {
+        Promise.resolve(fn(req, res, next)).catch((err: Error) => {
+          res.status(404).json({
+              Status: "Fail",
+              Message: err.message
+            });
+        });
     };
-}
+};

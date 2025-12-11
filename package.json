@@ -14,7 +14,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start:dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
 		"start:build": "rimraf dist && tsc",
-		"start:prod": "NODE_ENV=production node dist/index.js",
+		"start:prod": "node dist/index.js NODE_ENV=production",
 		"lint-format": "biome check --write"
 	},
 	"dependencies": {

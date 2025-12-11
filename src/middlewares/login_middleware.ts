@@ -25,8 +25,8 @@ const loginAuth = async (req: Request, res: Response, next: NextFunction) => {
 		const { errState, errMsg } = CheckBool(check2);
 		if (!errState) throw new Error(`Login-Msg: ${errMsg}`);
 		res.locals.loginData = arrLow;
-	} catch (error: any) {
-		catchError(error);
+	} catch (error: any) { // Adding any as the type works in development but it would be advisable to make some adjustment for important error incoming
+		catchError(error, error.message, 400, next);
 		return;
 	}
 

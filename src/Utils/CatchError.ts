@@ -22,7 +22,8 @@ function errorProdMood(err: Error) {
 		default:
 			typeOfError = "default Error";
 	}
-	return typeOfError = err.message;
+	console.log(`🧨 ${typeOfError}`);
+	return typeOfError;
 }
 
 function catchError(err: Error, message: string, statusCode: number, next: NextFunction) {

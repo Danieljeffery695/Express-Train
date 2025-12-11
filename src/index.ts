@@ -4,9 +4,10 @@ dotenv.config({ path: "./../config.env" });
 
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
-import express, { type Request, type Response } from "express";
+import express, { type Request, type Response, NextFunction } from "express";
 import dbConnection from "./Db/dbConnect";
 import userRouter from "./routes/userRoutes";
+import { handleAppError } from "./Utils/AppError";
 
 // Global Middlewares
 const app = express();
@@ -30,6 +31,19 @@ app.get("/", (req: Request, res: Response) => {
 
 // Custom routes and Middlewares
 app.use(userRouter);
+
+// Global error handling middlewares
+app.use(handleAppError());
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    console.error("ERROR:", err);
+
+    res.status(err.statusCode || 500).json({
+        error: err.message || "Server Error",
+    });
+
+	next();
+});
 
 const port = process.env.PORT;
 

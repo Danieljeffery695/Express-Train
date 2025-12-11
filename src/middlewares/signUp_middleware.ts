@@ -42,11 +42,7 @@ const signUpAuth = async (req: Request, res: Response, next: NextFunction) => {
 		// Check if the current number or email already exits in the database.
 		// But i won't because the field will be subjected to uniques values and so an error would erupt if another kind of same value occur.
 	} catch (error: any) {
-		res.status(404).json({
-			status: "failed",
-			message: "Something went wrong",
-		});
-		catchError(error);
+		catchError(error, error.message, 400, next);
 		return;
 	}
 

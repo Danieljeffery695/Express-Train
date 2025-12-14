@@ -11,7 +11,9 @@ export const protectRoutes = handleAsyncErr( async (req: Request, res: Response,
     if(authorizationtoken && authorizationtoken.includes("Bearer", 0)) token = authorizationtoken.toString().split(' ')[1];
     if(token) {
         const tokenDecoder = await jwt.verify(token, jwt_secret); 
+        console.log(tokenDecoder);
         next();
+        return;
     }
     
     catchError(new Error, "Not authorize", 401, next);

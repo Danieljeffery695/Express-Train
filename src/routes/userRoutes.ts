@@ -6,7 +6,7 @@ import { protectRoutes } from "../Controllers/AuthController";
 
 const userRouter = Router();
 
-userRouter.post("/signup", signUpAuth, createUser);
+userRouter.post("/signup", protectRoutes, signUpAuth, createUser);
 
 userRouter.post("/login", protectRoutes, loginAuth, getCurrentUser);
 

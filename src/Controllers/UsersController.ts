@@ -3,6 +3,8 @@ import Users from "../Models/Users";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { handleAsyncErr } from "../Utils/AsyncError";
+import {publicIp} from 'public-ip';
+
 
 const createToken = (id: Types.ObjectId) => {
 	if(process.env.JWT_SECRET && process.env.JWT_EXPIRE_DATE) {
@@ -20,6 +22,8 @@ const createToken = (id: Types.ObjectId) => {
 
 export const createUser = handleAsyncErr(async (req: Request, res: Response) => {
 		//This locals data is accessible everywhere across all chained request sent to the same endpoints
+		const ipAddress = await publicIp(); // Tries IPv6 first, falls back to IPv4
+
 		const [
 			name,
 			phone,
@@ -35,6 +39,7 @@ export const createUser = handleAsyncErr(async (req: Request, res: Response) => 
 			phoneNumberRegion,
 			password,
 			passwordConfirm,
+			ipAddress,
 		});
 
 		const signupToken: string | Types.ObjectId = createToken(newUser._id);

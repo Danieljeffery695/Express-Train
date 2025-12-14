@@ -51,6 +51,36 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 			type: Boolean,
 			default: false,
 		},
+
+		ipGeo: {
+			type: [String],
+			default: ["33.4717787","-70.9594977"],
+		},
+
+		ipAddress: {
+			type: String
+		},
+
+		passwordChanged: {
+			type: Boolean,
+			default: false
+		},
+
+		passwordChangedAt: {
+			type: Date,
+			default: Date.now()
+		},
+
+		deactivated: {
+			type: Boolean,
+			default: false
+		},
+
+		deactivatedAt: {
+			type: Date,
+			default: Date.now()
+		}
+
 	},
 	{
 		timestamps: true,

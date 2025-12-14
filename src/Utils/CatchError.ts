@@ -15,10 +15,19 @@ function errorProdMood(err: Error) {
 			break;
 		case "ValidationError":
 			typeOfError = "Validation of data failed. please input the right data";
+			break;
 		case "MongoServerError":
 			typeOfError = "Server Error";
+			break;
 		case "SyntaxError":
 			typeOfError = "Something went wrong after posting your data";
+			break;
+		case "JsonWebTokenError":
+			typeOfError = "invalid signature";
+			break;
+		case "TokenExpiredError":
+			typeOfError = "Expired signature";
+			break;
 		default:
 			typeOfError = "default Error";
 	}

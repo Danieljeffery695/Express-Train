@@ -1,9 +1,10 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import Users from "../Models/Users";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { handleAsyncErr } from "../Utils/AsyncError";
 import {publicIp} from 'public-ip';
+import emailSender from "../Utils/EmailSender";
 
 
 const createToken = (id: Types.ObjectId) => {
@@ -72,4 +73,23 @@ export const getCurrentUser = handleAsyncErr(async(req: Request, res: Response) 
 			data: findUser,
 		});
 		return;
+});
+
+
+export const forgetPassword = handleAsyncErr(async(req: Request, res: Response, next: NextFunction) => {
+	const [email]: Array<string> = res.locals.forgotPasswordData;
+	const checkEmailExits = await Users.findOne({email});
+	if (!checkEmailExits) {
+		throw new Error("Wrong Info. no such user found");
+	}
+
+	emailSender(next);
+
+	res.status(201).json({
+		Status: "success",
 	});
+
+	return;
+
+});
+		

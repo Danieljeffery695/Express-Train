@@ -15,9 +15,11 @@ export interface IUserCreate {
 	passwordConfirm?: string;
 	isAdmin: boolean;
 	ipGeo: Array<string>;
-	ipAddress: string;
+	ipAddress: Array<string>;
 	passwordChanged: boolean;
 	passwordChangedAt: Date;
+	resetPasswordToken: string;
+	resetPasswordTokenExpires: Date;
 	deactivated: boolean;
 	deactivatedAt: Date;
 	updatedAt: Date;

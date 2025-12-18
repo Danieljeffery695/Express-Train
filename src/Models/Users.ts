@@ -58,7 +58,8 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 		},
 
 		ipAddress: {
-			type: String
+			type: [String],
+			default: undefined
 		},
 
 		passwordChanged: {
@@ -68,7 +69,17 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 
 		passwordChangedAt: {
 			type: Date,
-			default: Date.now()
+			default: undefined
+		},
+
+		resetPasswordToken: {
+			type: String,
+			default: undefined
+		}, 
+
+		resetPasswordTokenExpires: {
+			type: Date,
+			default: undefined
 		},
 
 		deactivated: {
@@ -78,7 +89,7 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 
 		deactivatedAt: {
 			type: Date,
-			default: Date.now()
+			default: undefined
 		}
 
 	},

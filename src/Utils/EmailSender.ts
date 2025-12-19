@@ -2,7 +2,7 @@ import nodemailer  from "nodemailer";
 import catchError from "./CatchError";
 import {NextFunction} from "express";
 
-async function emailSender(next: NextFunction) {
+async function emailSender(receiver: string, subject: string, token: string, next: NextFunction) {
     try {
         if(process.env.EMAIL_HOST && process.env.EMAIL_PORT && process.env.EMAIL_USERNAME && process.env.EMAIL_PASSWORD) {   
 // Create a test account or replace with real credentials.
@@ -20,11 +20,13 @@ async function emailSender(next: NextFunction) {
 
 // Wrap in an async IIFE so we can use await.
 const info = await transporter.sendMail({
-    from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
-    to: "bar@example.com, baz@example.com",
-    subject: "Hello ✔",
-    text: "Hello world?", // plain‑text body
-    html: "<b>Hello world?</b>", // HTML body
+    from: '"Express Train Web 🚄🚊" <ExpressTrainweb123@email>',
+    to: receiver,
+    subject,
+    text: "Express Reset Password Token", // plain‑text body
+    html: `<h1>Please ignore this message if you are not the one who requested for password changes</h1>
+    <p>kindly click on the link and to set a new password ${token}</p>
+    <p>You got 10 minutes to reset your password</p>`, // HTML body
 });
 
 console.log("Message sent:", info.messageId);

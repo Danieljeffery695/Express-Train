@@ -8,7 +8,7 @@ userRouter.post("/signup", signUpAuth, createUser);
 
 userRouter.post("/login", loginAuth, getCurrentUser);
 
-userRouter.post("/forget-password", forgotPasswordAuth, forgetPassword);
+userRouter.patch("/forget-password", forgotPasswordAuth, forgetPassword);
 
 
 export default userRouter;

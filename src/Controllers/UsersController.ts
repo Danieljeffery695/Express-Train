@@ -5,6 +5,7 @@ import { Types } from "mongoose";
 import { handleAsyncErr } from "../Utils/AsyncError";
 import {publicIp} from 'public-ip';
 import emailSender from "../Utils/EmailSender";
+import { hashForgetPasswordToken } from "../Utils/TokenHashing";
 
 
 const createToken = (id: Types.ObjectId) => {
@@ -23,7 +24,7 @@ const createToken = (id: Types.ObjectId) => {
 
 export const createUser = handleAsyncErr(async (req: Request, res: Response) => {
 		//This locals data is accessible everywhere across all chained request sent to the same endpoints
-		const ipAddress = await publicIp(); // Tries IPv6 first, falls back to IPv4
+		const ip = await publicIp();
 
 		const [
 			name,
@@ -40,7 +41,7 @@ export const createUser = handleAsyncErr(async (req: Request, res: Response) => 
 			phoneNumberRegion,
 			password,
 			passwordConfirm,
-			ipAddress,
+			ipAddress: [ip],
 		});
 
 		const signupToken: string | Types.ObjectId = createToken(newUser._id);
@@ -79,11 +80,20 @@ export const getCurrentUser = handleAsyncErr(async(req: Request, res: Response) 
 export const forgetPassword = handleAsyncErr(async(req: Request, res: Response, next: NextFunction) => {
 	const [email]: Array<string> = res.locals.forgotPasswordData;
 	const checkEmailExits = await Users.findOne({email});
-	if (!checkEmailExits) {
+	if (!checkEmailExits) 
 		throw new Error("Wrong Info. no such user found");
-	}
 
-	emailSender(next);
+	const id: Types.ObjectId = checkEmailExits._id;
+	const {saltToken, hashToken} = hashForgetPasswordToken(id.toString());
+	const resetPasswordTokenExpires = Date.now() + 10 * 60 * 1000;
+	const resetPasswordToken = hashToken;
+	const resetUrl = `/reset-password/${hashToken}`;
+
+	const updateToken = await Users.updateOne({email}, {$set: {resetPasswordToken, resetPasswordTokenExpires}});
+
+	if(!updateToken.acknowledged && updateToken.modifiedCount !== 2) throw new Error("Wrong Email. Cannot update password");
+
+	emailSender(checkEmailExits.email, "New Password Token", resetUrl, next);
 
 	res.status(201).json({
 		Status: "success",
@@ -92,4 +102,6 @@ export const forgetPassword = handleAsyncErr(async(req: Request, res: Response, 
 	return;
 
 });
+
+
 		

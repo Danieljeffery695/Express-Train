@@ -1,4 +1,4 @@
-import {NextFunction} from "express";
+import type { NextFunction } from "express";
 
 function errorProdMood(err: Error) {
 	// If environment is in production or others then error checks should be run
@@ -35,13 +35,18 @@ function errorProdMood(err: Error) {
 	return typeOfError;
 }
 
-function catchError(err: Error, message: string, statusCode: number, next: NextFunction) {
-	if (process.env.NODE_ENV == "development") {		
+function catchError(
+	err: Error,
+	message: string,
+	statusCode: number,
+	next: NextFunction,
+) {
+	if (process.env.NODE_ENV == "development") {
 		console.log(err);
-		return next({err, responseMsg: message, statusCode});
+		return next({ err, responseMsg: message, statusCode });
 	} else {
 		errorProdMood(err);
-   }
+	}
 }
 
 export default catchError;

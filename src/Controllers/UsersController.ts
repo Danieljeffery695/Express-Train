@@ -1,28 +1,31 @@
-import type { Request, Response, NextFunction } from "express";
-import Users from "../Models/Users";
+import bcrypt from "bcryptjs";
+import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
+import type { Types } from "mongoose";
+import { publicIp } from "public-ip";
+import Users from "../Models/Users";
 import { handleAsyncErr } from "../Utils/AsyncError";
-import {publicIp} from 'public-ip';
 import emailSender from "../Utils/EmailSender";
 import { hashForgetPasswordToken } from "../Utils/TokenHashing";
 
-
 const createToken = (id: Types.ObjectId) => {
-	if(process.env.JWT_SECRET && process.env.JWT_EXPIRE_DATE) {
-			// The VAR keyword was use here to make sure the variable can be used outside the if/else blocks
-			var jwtSecret: string | object = process.env.JWT_SECRET;
-			var jwtDate: number | string = process.env.JWT_EXPIRE_DATE;
-			var signupToken = jwt.sign({id}, jwtSecret, {
-				expiresIn: +jwtDate
-			});
-			return signupToken;
-		} else {
-			throw new Error("Server error, something went wrong on our side. get back to you");
+	if (process.env.JWT_SECRET && process.env.JWT_EXPIRE_DATE) {
+		// The VAR keyword was use here to make sure the variable can be used outside the if/else blocks
+		var jwtSecret: string | object = process.env.JWT_SECRET;
+		var jwtDate: number | string = process.env.JWT_EXPIRE_DATE;
+		var signupToken = jwt.sign({ id }, jwtSecret, {
+			expiresIn: +jwtDate,
+		});
+		return signupToken;
+	} else {
+		throw new Error(
+			"Server error, something went wrong on our side. get back to you",
+		);
 	}
-}
+};
 
-export const createUser = handleAsyncErr(async (req: Request, res: Response) => {
+export const createUser = handleAsyncErr(
+	async (req: Request, res: Response) => {
 		//This locals data is accessible everywhere across all chained request sent to the same endpoints
 		const ip = await publicIp();
 
@@ -52,9 +55,11 @@ export const createUser = handleAsyncErr(async (req: Request, res: Response) => 
 			data: newUser,
 		});
 		return;
-});
+	},
+);
 
-export const getCurrentUser = handleAsyncErr(async(req: Request, res: Response) => {
+export const getCurrentUser = handleAsyncErr(
+	async (req: Request, res: Response) => {
 		const [email, password]: Array<string> = res.locals.loginData;
 		const findUser = await Users.findOne({
 			email,
@@ -74,34 +79,80 @@ export const getCurrentUser = handleAsyncErr(async(req: Request, res: Response) 
 			data: findUser,
 		});
 		return;
-});
+	},
+);
 
+export const forgetPassword = handleAsyncErr(
+	async (req: Request, res: Response, next: NextFunction) => {
+		if (req.method === "POST") {
+			const [email]: Array<string> = res.locals.forgotPasswordData;
+			const checkEmailExits = await Users.findOne({ email });
+			if (!checkEmailExits) throw new Error("Wrong Info. no such user found");
 
-export const forgetPassword = handleAsyncErr(async(req: Request, res: Response, next: NextFunction) => {
-	const [email]: Array<string> = res.locals.forgotPasswordData;
-	const checkEmailExits = await Users.findOne({email});
-	if (!checkEmailExits) 
-		throw new Error("Wrong Info. no such user found");
+			const id: Types.ObjectId = checkEmailExits._id;
+			const { saltToken, hashToken } = hashForgetPasswordToken(id.toString());
+			const resetPasswordTokenExpires = Date.now() + 10 * 60 * 1000;
+			const resetPasswordToken = hashToken;
+			const resetUrl = `/reset-password/${hashToken}`;
 
-	const id: Types.ObjectId = checkEmailExits._id;
-	const {saltToken, hashToken} = hashForgetPasswordToken(id.toString());
-	const resetPasswordTokenExpires = Date.now() + 10 * 60 * 1000;
-	const resetPasswordToken = hashToken;
-	const resetUrl = `/reset-password/${hashToken}`;
+			const updateToken = await Users.updateOne(
+				{ email },
+				{ $set: { resetPasswordToken, resetPasswordTokenExpires } },
+			);
+			if (!updateToken.acknowledged && updateToken.modifiedCount !== 2)
+				throw new Error("Wrong Email. Cannot update password");
+			if (!resetPasswordToken && !resetPasswordTokenExpires)
+				throw new Error("Wrong Email. Cannot update password");
+			req.session.resetToken = {
+				resetPasswordTokenExpires,
+				resetPasswordToken,
+				resetUrl,
+				id: id.toString(),
+				saltToken,
+			};
 
-	const updateToken = await Users.updateOne({email}, {$set: {resetPasswordToken, resetPasswordTokenExpires}});
+			console.log(resetPasswordTokenExpires);
 
-	if(!updateToken.acknowledged && updateToken.modifiedCount !== 2) throw new Error("Wrong Email. Cannot update password");
+			emailSender(checkEmailExits.email, "New Password Token", resetUrl, next);
 
-	emailSender(checkEmailExits.email, "New Password Token", resetUrl, next);
+			res.status(201).json({
+				Status: "success",
+				Token: resetPasswordToken,
+			});
+		} else if (req.method === "PATCH") {
+			const [newPassword] = res.locals.newPasswordData;
+			const { id } = req.session.resetToken;
+			const userId: string | number | Types.ObjectId = id;
+			const checkIdExits = await Users.findById({ _id: userId });
+			if (!checkIdExits) throw new Error("Wrong Info. no such user found");
 
-	res.status(201).json({
-		Status: "success",
-	});
+			const updates = {
+				password: await bcrypt.hash(newPassword, 12),
+				passwordConfirm: undefined,
+				passwordChanged: true,
+				passwordChangedAt: Date.now(),
+				resetPasswordToken: null, //Inserting null make it easy for validation on later. $unset would have be there in the query but we will leave things like this.
+				resetPasswordTokenExpires: null, //We might change later in the future but now thing are going to stay this way.
+			};
+			// We can use save for more validation and hashing and we will go manually this time around...
+			const updateQuery = await Users.updateOne(
+				{ _id: userId },
+				{ $set: updates },
+			);
+			if (!updateQuery.acknowledged && updateQuery.modifiedCount !== 6)
+				throw new Error("Wrong Email. Cannot update password");
 
-	return;
+			// Redirect users to login page or automatic log them in.
+			req.session.resetToken = null; // Setting all value to null so the same token can't be use twice.
 
-});
+			res.status(201).json({
+				Status: "success",
+				User: updateQuery,
+			});
+		} else {
+			throw new Error("Something went wrong. please follow normal routes");
+		}
 
-
-		
+		return;
+	},
+);

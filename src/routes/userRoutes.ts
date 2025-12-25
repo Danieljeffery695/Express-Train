@@ -1,6 +1,14 @@
 import { Router } from "express";
-import { createUser, getCurrentUser, forgetPassword } from "../Controllers/UsersController";
-import { signUpAuth, loginAuth, forgotPasswordAuth } from "../middlewares/user_middleware";
+import {
+	createUser,
+	forgetPassword,
+	getCurrentUser,
+} from "../Controllers/UsersController";
+import {
+	forgotPasswordAuth,
+	loginAuth,
+	signUpAuth,
+} from "../middlewares/user_middleware";
 
 const userRouter = Router();
 
@@ -8,7 +16,8 @@ userRouter.post("/signup", signUpAuth, createUser);
 
 userRouter.post("/login", loginAuth, getCurrentUser);
 
-userRouter.patch("/forget-password", forgotPasswordAuth, forgetPassword);
-
+userRouter
+	.post("/forget-password", forgotPasswordAuth, forgetPassword)
+	.patch("/forget-password/:token", forgotPasswordAuth, forgetPassword);
 
 export default userRouter;

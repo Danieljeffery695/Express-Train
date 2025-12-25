@@ -30,3 +30,11 @@ export interface IUserCreate {
 		userDbPwd: string,
 	): Promise<boolean>;
 }
+
+export interface ResetTokenType {
+	resetPasswordTokenExpires: Date;
+	resetPasswordToken?: string;
+	resetUrl: string;
+	id: string;
+	saltToken: string;
+}

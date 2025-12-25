@@ -1,5 +1,5 @@
-import mongoose, { type HydratedDocument } from "mongoose";
 import bcrypt from "bcryptjs";
+import mongoose, { type HydratedDocument } from "mongoose";
 import type { IUserCreate } from "../Utils/DataChecking";
 
 const userSchema = new mongoose.Schema<IUserCreate>(
@@ -54,44 +54,43 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 
 		ipGeo: {
 			type: [String],
-			default: ["33.4717787","-70.9594977"],
+			default: ["33.4717787", "-70.9594977"],
 		},
 
 		ipAddress: {
 			type: [String],
-			default: undefined
+			default: undefined,
 		},
 
 		passwordChanged: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 
 		passwordChangedAt: {
 			type: Date,
-			default: undefined
+			default: undefined,
 		},
 
 		resetPasswordToken: {
 			type: String,
-			default: undefined
-		}, 
+			default: undefined,
+		},
 
 		resetPasswordTokenExpires: {
 			type: Date,
-			default: undefined
+			default: undefined,
 		},
 
 		deactivated: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 
 		deactivatedAt: {
 			type: Date,
-			default: undefined
-		}
-
+			default: undefined,
+		},
 	},
 	{
 		timestamps: true,

@@ -1,3 +1,6 @@
+
+import { JwtPayload } from "jsonwebtoken";
+
 export interface BodyCasting {
 	name?: string;
 	email: string;
@@ -13,6 +16,7 @@ export interface IUserCreate {
 	phoneNumberRegion: string;
 	password: string;
 	passwordConfirm?: string;
+	role: string;
 	isAdmin: boolean;
 	ipGeo: Array<string>;
 	ipAddress: Array<string>;

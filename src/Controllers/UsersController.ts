@@ -28,6 +28,7 @@ export const createUser = handleAsyncErr(
 	async (req: Request, res: Response) => {
 		//This locals data is accessible everywhere across all chained request sent to the same endpoints
 		const ip = await publicIp();
+		const countDoc = await Users.countDocuments() > 0 ? {role: "user", isAdmin: false} : {role: "superAdmin", isAdmin: true};
 
 		const [
 			name,
@@ -44,6 +45,8 @@ export const createUser = handleAsyncErr(
 			phoneNumberRegion,
 			password,
 			passwordConfirm,
+			role: countDoc.role,
+			isAdmin: countDoc.isAdmin,
 			ipAddress: [ip],
 		});
 

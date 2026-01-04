@@ -47,6 +47,12 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 			},
 		},
 
+		role: {
+			type: String,
+			enums: ["user", "admin", "superAdmin"],
+			default: "user",
+		},
+
 		isAdmin: {
 			type: Boolean,
 			default: false,

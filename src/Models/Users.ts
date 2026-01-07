@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
+import type { Types } from "mongoose";
 import mongoose, { type HydratedDocument } from "mongoose";
 import type { IUserCreate } from "../Utils/DataChecking";
-import type { Types } from "mongoose";
 
 const userSchema = new mongoose.Schema<IUserCreate>(
 	{
@@ -118,10 +118,10 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 
 userSchema.pre("save", async function () {
 	if (!this.isModified("password")) return;
-	if(this.role === "superAdmin") {
-	const id: Types.ObjectId = this._id;
-	this.AdminToken = await bcrypt.hash(id.toString(), 16);
-	this.AdminTokenExpires = Date.now() + (1 * 60 * 1000);
+	if (this.role === "superAdmin") {
+		const id: Types.ObjectId = this._id;
+		this.AdminToken = await bcrypt.hash(id.toString(), 16);
+		this.AdminTokenExpires = Date.now() + 1 * 60 * 1000;
 	}
 
 	this.password = await bcrypt.hash(this.password, 12);

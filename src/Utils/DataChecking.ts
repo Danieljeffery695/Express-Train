@@ -17,6 +17,8 @@ export interface IUserCreate {
 	password: string;
 	passwordConfirm?: string;
 	role: string;
+	AdminToken: string;
+	AdminTokenExpires: number;
 	isAdmin: boolean;
 	ipGeo: Array<string>;
 	ipAddress: Array<string>;

@@ -2,7 +2,7 @@ import type { NextFunction } from "express";
 import nodemailer from "nodemailer";
 import catchError from "./CatchError";
 
-async function emailSender(
+export async function emailSenderToken(
 	receiver: string,
 	subject: string,
 	token: string,
@@ -46,4 +46,51 @@ async function emailSender(
 	}
 }
 
-export default emailSender;
+export async function adminEmailSender(subject: string, next: NextFunction) {
+	try {
+		const generatedCode = [];
+		for (let i = 0; i < 6; i++) {
+			const min = Math.ceil(1);
+			const max = Math.floor(100);
+			console.log(Math.floor(Math.random() * (max - min + 1)) + min);
+			generatedCode.push(Math.floor(Math.random() * (max - min + 1)) + min);
+		}
+
+		console.log(generatedCode.toString());
+		if (
+			process.env.EMAIL_HOST &&
+			process.env.EMAIL_PORT &&
+			process.env.EMAIL_USERNAME &&
+			process.env.EMAIL_PASSWORD &&
+			process.env.COMPANY_EMAIL
+		) {
+			// Create a test account or replace with real credentials.
+
+			const transporter = nodemailer.createTransport({
+				host: process.env.EMAIL_HOST,
+				port: 2525,
+				secure: false, // true for 465, false for other ports
+				auth: {
+					user: process.env.EMAIL_USERNAME,
+					pass: process.env.EMAIL_PASSWORD,
+				},
+			});
+
+			// Wrap in an async IIFE so we can use await.
+			const info = await transporter.sendMail({
+				from: '"Express Train Web 🚄🚊" <ExpressTrainweb123@email>',
+				to: process.env.COMPANY_EMAIL,
+				subject,
+				text: "Express Reset Password Token", // plain‑text body
+				html: `<h>Please do not share this code with any body except superAdmin that requested it. kindly call and check to make sure
+				 it comes from the rightful location</h>
+				 <p>Your access code: ${generatedCode.toString()}</p>`, // HTML body
+			});
+
+			console.log("Message sent:", info.messageId);
+			return info;
+		}
+	} catch (error: any) {
+		catchError(error, error.message, 400, next);
+	}
+}

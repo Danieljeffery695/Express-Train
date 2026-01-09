@@ -10,6 +10,7 @@ import express, {
 import { rateLimit } from "express-rate-limit";
 import session from "express-session";
 import helmet from "helmet";
+import cookieParser from "cookie-parser"
 import dbConnection from "./Db/dbConnect";
 import userRouter from "./routes/userRoutes";
 import { handleAppError } from "./Utils/AppError";
@@ -26,7 +27,7 @@ const limiter = rateLimit({
 
 app.use(helmet());
 app.use(limiter);
-
+app.use(cookieParser());
 app.use(express.json());
 if (process.env.EXPRESS_SESSION_SECRET_KEY) {
 	app.use(
@@ -42,7 +43,7 @@ dbConnection();
 
 // Local routes
 app.get("/", (req: Request, res: Response) => {
-	res.status(200).send("simple");
+  res.status(200).send("simple");
 });
 
 // Custom routes and Middlewares

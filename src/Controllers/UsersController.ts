@@ -5,10 +5,10 @@ import type { Types } from "mongoose";
 import { publicIp } from "public-ip";
 import Users from "../Models/Users";
 import { handleAsyncErr } from "../Utils/AsyncError";
-import emailSender from "../Utils/EmailSender";
+import { adminEmailSender, emailSenderToken } from "../Utils/EmailSender";
 import { hashForgetPasswordToken } from "../Utils/TokenHashing";
 
-const createToken = (id: Types.ObjectId) => {
+export const createToken = (id: Types.ObjectId) => {
 	if (process.env.JWT_SECRET && process.env.JWT_EXPIRE_DATE) {
 		// The VAR keyword was use here to make sure the variable can be used outside the if/else blocks
 		var jwtSecret: string | object = process.env.JWT_SECRET;
@@ -25,10 +25,15 @@ const createToken = (id: Types.ObjectId) => {
 };
 
 export const createUser = handleAsyncErr(
-	async (req: Request, res: Response) => {
+	async (req: Request, res: Response, next: NextFunction) => {
 		//This locals data is accessible everywhere across all chained request sent to the same endpoints
 		const ip = await publicIp();
-		const countDoc = await Users.countDocuments() > 0 ? {role: "user", isAdmin: false} : {role: "superAdmin", isAdmin: true};
+		const countDoc =
+			(await Users.countDocuments()) > 0
+				? { role: "user", isAdmin: false }
+				: { role: "superAdmin", isAdmin: true };
+		if (countDoc.role === "superAdmin")
+			adminEmailSender("Creation of Super-Admin 👨‍💻", next);
 
 		const [
 			name,
@@ -116,7 +121,12 @@ export const forgetPassword = handleAsyncErr(
 
 			console.log(resetPasswordTokenExpires);
 
-			emailSender(checkEmailExits.email, "New Password Token", resetUrl, next);
+			emailSenderToken(
+				checkEmailExits.email,
+				"New Password Token",
+				resetUrl,
+				next,
+			);
 
 			res.status(201).json({
 				Status: "success",

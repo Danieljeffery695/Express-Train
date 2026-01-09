@@ -61,7 +61,7 @@ const userSchema = new mongoose.Schema<IUserCreate>(
 		},
 
 		AdminTokenExpires: {
-			type: Number,
+			type: String,
 			default: undefined,
 			select: false,
 		},
@@ -121,7 +121,7 @@ userSchema.pre("save", async function () {
 	if (this.role === "superAdmin") {
 		const id: Types.ObjectId = this._id;
 		this.AdminToken = await bcrypt.hash(id.toString(), 16);
-		this.AdminTokenExpires = Date.now() + 1 * 60 * 1000;
+		this.AdminTokenExpires = new Date().toDateString();
 	}
 
 	this.password = await bcrypt.hash(this.password, 12);

@@ -55,7 +55,20 @@ export const createUser = handleAsyncErr(
 			ipAddress: [ip],
 		});
 
-		const signupToken: string | Types.ObjectId = createToken(newUser._id);
+		const signupToken: Object | string | Types.ObjectId =
+			newUser.role === "superAdmin"
+				? {
+						access_token: createToken(newUser._id),
+						access_token_101: newUser.AdminToken,
+					}
+				: createToken(newUser._id);
+
+		res.cookie("access_token", signupToken, {
+			httpOnly: true, 
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
+			maxAge: 7 * 24 * 60 * 60 * 1000,
+		});
 
 		res.status(201).json({
 			Status: "success",
@@ -80,7 +93,20 @@ export const getCurrentUser = handleAsyncErr(
 			throw new Error("Wrong Info. no such user found");
 		}
 
-		const signupToken: string | Types.ObjectId = createToken(findUser._id);
+		const signupToken: Object | string | Types.ObjectId =
+			findUser.role === "superAdmin"
+				? {
+						access_token: createToken(findUser._id),
+						access_token_101: findUser.AdminToken,
+					}
+				: createToken(findUser._id);
+
+		res.cookie("access_token", signupToken, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
+			maxAge: 7 * 24 * 60 * 60 * 1000,
+		});
 
 		res.status(201).json({
 			auth: signupToken,

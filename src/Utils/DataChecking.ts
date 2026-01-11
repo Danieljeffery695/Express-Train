@@ -1,5 +1,5 @@
+import type { Types } from "mongoose";
 
-import { JwtPayload } from "jsonwebtoken";
 
 export interface BodyCasting {
 	name?: string;
@@ -43,4 +43,12 @@ export interface ResetTokenType {
 	resetUrl: string;
 	id: string;
 	saltToken: string;
+}
+
+export interface ITrainCreate {
+	name: string;
+	number: string;
+	train_Types: string;
+	coaches: Types.ObjectId;
+	route: Types.ObjectId;
 }

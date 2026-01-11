@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "./../config.env" });
 
+import cookieParser from "cookie-parser";
 import express, {
 	type NextFunction,
 	type Request,
@@ -10,8 +11,8 @@ import express, {
 import { rateLimit } from "express-rate-limit";
 import session from "express-session";
 import helmet from "helmet";
-import cookieParser from "cookie-parser"
 import dbConnection from "./Db/dbConnect";
+import trainRouter from "./routes/trainsRoutes";
 import userRouter from "./routes/userRoutes";
 import { handleAppError } from "./Utils/AppError";
 
@@ -43,11 +44,12 @@ dbConnection();
 
 // Local routes
 app.get("/", (req: Request, res: Response) => {
-  res.status(200).send("simple");
+	res.status(200).send("simple");
 });
 
 // Custom routes and Middlewares
 app.use(userRouter);
+app.use(trainRouter);
 
 // Global error handling middlewares
 app.use(handleAppError());

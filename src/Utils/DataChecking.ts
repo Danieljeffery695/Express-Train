@@ -52,3 +52,12 @@ export interface ITrainCreate {
 	coaches: Types.ObjectId;
 	route: Types.ObjectId;
 }
+
+export interface ITrainRouteCreate {
+	train: Types.ObjectId;
+	from: Types.ObjectId;
+	to: Types.ObjectId;
+	stops: Types.ObjectId;
+	arrivalTime: Date;
+	departureTime: Date;
+}

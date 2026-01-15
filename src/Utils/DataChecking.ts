@@ -61,3 +61,26 @@ export interface ITrainRouteCreate {
 	arrivalTime: Date;
 	departureTime: Date;
 }
+
+export interface ITrainCoach {
+	train: Types.ObjectId;
+	coachType: string;
+	seatCount: number;
+	seats: Types.ObjectId;
+}
+
+export interface ITrainStation {
+	name: string;
+	code: string;
+	city: string;
+	state: string;
+	country: string;
+}
+
+export interface ITrainSeats {
+	coach: Types.ObjectId;
+	seat_number: string;
+	seat_type: string;
+	isWindow: boolean;
+	isAvailable: boolean;
+}

@@ -70,7 +70,7 @@ export interface ITrainCoach {
 }
 
 export interface ITrainStation {
-	name: string;
+	station_name: string;
 	code: string;
 	city: string;
 	state: string;
@@ -84,3 +84,4 @@ export interface ITrainSeats {
 	isWindow: boolean;
 	isAvailable: boolean;
 }
+

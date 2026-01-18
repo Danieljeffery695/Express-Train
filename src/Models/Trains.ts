@@ -6,11 +6,13 @@ const trainSchema = new mongoose.Schema<ITrainCreate>(
 		name: {
 			type: String,
 			unique: true,
+			required: [true, "name is required"],
 		},
 
 		number: {
 			type: String,
 			unique: true,
+			required: [true, "number is required"],
 		},
 
 		train_Types: {
@@ -20,13 +22,11 @@ const trainSchema = new mongoose.Schema<ITrainCreate>(
 		coaches: {
 			type: Schema.Types.ObjectId,
 			ref: "Coach",
-			required: [true, "coaches require"],
 		},
 
 		route: {
 			type: Schema.Types.ObjectId,
 			ref: "Route",
-			required: [true, "route require"],
 		},
 	},
 	{

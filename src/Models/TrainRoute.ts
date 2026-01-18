@@ -19,11 +19,7 @@ const routeSchema = new mongoose.Schema<ITrainRouteCreate>(
 			ref: "Station",
 		},
 
-		stops: [
-			{
-				station: { type: Schema.Types.ObjectId, ref: "Station" },
-			},
-		],
+		stops: { type: Schema.Types.ObjectId, ref: "Station" },
 
 		arrivalTime: { type: Date },
 		departureTime: { type: Date },

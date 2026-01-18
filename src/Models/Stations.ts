@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { ITrainStation } from "../Utils/DataChecking";
 
 const stationSchema = new mongoose.Schema<ITrainStation>({
-    name: {type: String},
+    station_name: {type: String},
     code: {type: String},
     city: {type: String},
     state: {type: String},
@@ -15,3 +15,5 @@ const stationSchema = new mongoose.Schema<ITrainStation>({
 );
 
 const TrainStation = mongoose.model<ITrainStation>("Station", stationSchema);
+
+export default TrainStation;

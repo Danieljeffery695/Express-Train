@@ -85,3 +85,25 @@ export interface ITrainSeats {
 	isAvailable: boolean;
 }
 
+export interface ITrainSchedule {
+	train: Types.ObjectId;
+	date: Date;
+	departureTime: string;
+	arrivalTime: string;
+	status: string;
+}
+
+export type passengersTypes = {
+	name: string;
+	age: number;
+	gender: string;
+}
+
+export interface ITrainBooking {
+	user: Types.ObjectId;
+	schedule: Types.ObjectId;
+	seats: Types.ObjectId;
+	passengers: passengersTypes;
+	totalPrice: number;
+	status: string
+}

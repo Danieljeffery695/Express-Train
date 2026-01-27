@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import type { ITrainCreate } from "../Utils/DataChecking";
 
-const trainSchema = new mongoose.Schema<ITrainCreate>(
+const trainSchema = new mongoose.Schema<Required<ITrainCreate>>(
 	{
 		name: {
 			type: String,
@@ -34,6 +34,6 @@ const trainSchema = new mongoose.Schema<ITrainCreate>(
 	},
 );
 
-const Trains = mongoose.model<ITrainCreate>("Trains", trainSchema);
+const Trains = mongoose.model<Required<ITrainCreate>>("Trains", trainSchema);
 
 export default Trains;

@@ -1,7 +1,10 @@
+// This model will be created when user book a train session. so admin cannot create it on their side
+// User will navigate to their train of their choice and choose and that id of the train will be use for creating adequate seats
+
 import mongoose, { Schema } from "mongoose";
 import { ITrainSeats } from "../Utils/DataChecking";
 
-const seatSchema = new mongoose.Schema<ITrainSeats>(
+const seatSchema = new mongoose.Schema<Required<ITrainSeats>>(
     {
         coach: {
             type: Schema.Types.ObjectId,
@@ -29,6 +32,6 @@ const seatSchema = new mongoose.Schema<ITrainSeats>(
     },
 );
 
-const Seats = mongoose.model<ITrainSeats>("Seats", seatSchema);
+const Seats = mongoose.model<Required<ITrainSeats>>("Seats", seatSchema);
 
 export default Seats;

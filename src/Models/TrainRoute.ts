@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import type { ITrainRouteCreate } from "../Utils/DataChecking";
 
-const routeSchema = new mongoose.Schema<ITrainRouteCreate>(
+const routeSchema = new mongoose.Schema<Required<ITrainRouteCreate>>(
 	{
 		train: {
 			type: Schema.Types.ObjectId,
@@ -29,6 +29,6 @@ const routeSchema = new mongoose.Schema<ITrainRouteCreate>(
 	},
 );
 
-const TrainRoute = mongoose.model<ITrainRouteCreate>("Route", routeSchema);
+const TrainRoute = mongoose.model<Required<ITrainRouteCreate>>("Route", routeSchema);
 
 export default TrainRoute;

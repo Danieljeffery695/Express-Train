@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import type { ITrainBooking } from "../Utils/DataChecking";
 
-const trainBooking = new mongoose.Schema<ITrainBooking>(
+const trainBooking = new mongoose.Schema<Required<ITrainBooking>>(
 	{
 		user: {
 			type: Schema.Types.ObjectId,
@@ -38,6 +38,6 @@ const trainBooking = new mongoose.Schema<ITrainBooking>(
 	},
 );
 
-const TrainBookings = mongoose.model<ITrainBooking>("Bookings", trainBooking);
+const TrainBookings = mongoose.model<Required<ITrainBooking>>("Bookings", trainBooking);
 
 export default TrainBookings;

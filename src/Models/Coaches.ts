@@ -1,7 +1,7 @@
 import mongoose, {Schema} from "mongoose";
 import { ITrainCoach } from "../Utils/DataChecking";
 
-const coachSchema = new mongoose.Schema<ITrainCoach>({
+const coachSchema = new mongoose.Schema<Required<ITrainCoach>>({
     train: {
         type: Schema.Types.ObjectId,
         ref: "Trains",

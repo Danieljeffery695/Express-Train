@@ -2,12 +2,13 @@ import mongoose from "mongoose";
 
 const dbConnection = async () => {
 	try {
-		const { DB_STRING, DB_PASSWORD, NODE_ENV } = process.env;
-		if (!DB_STRING || !DB_PASSWORD || !NODE_ENV) {
+		const { DB_STRING, DB_PASSWORD, NODE_ENV, DB_LOCAL } = process.env;
+		if (!DB_STRING || !DB_PASSWORD || !NODE_ENV || !DB_LOCAL) {
 			throw new Error("Missing database environment variables 🧨");
 		}
-		const dbString: string = DB_STRING.replace("<PASSWORD>", DB_PASSWORD);
-		await mongoose.connect(dbString);
+		const dbString: string = DB_STRING.replace("<PASSWORD>", DB_PASSWORD); 
+		await mongoose.connect(dbString); // connection string for live host or clusters
+		// await mongoose.connect(DB_LOCAL); // Local host connection...advisable for developers 
 		console.log("Database Connected Successfully");
 	} catch (error) {
 		if (process.env.NODE_ENV === "development") {

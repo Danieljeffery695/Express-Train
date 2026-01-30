@@ -5,7 +5,11 @@ import TrainStation from "../Models/Stations";
 import TrainRoute from "../Models/TrainRoute";
 import Trains from "../Models/Trains";
 import { handleAsyncErr } from "../Utils/AsyncError";
-import type { ITrainStation, ITrainCreate } from "../Utils/DataChecking";
+import type {
+	ITrainCoach,
+	ITrainRouteCreate,
+	ITrainStation,
+} from "../Utils/DataChecking";
 
 export const createTrain = handleAsyncErr(
 	async (req: Request, res: Response, _next: NextFunction) => {
@@ -81,23 +85,53 @@ export const createStation = async (data: ITrainStation) => {
 	return newStation._id;
 };
 
+type SearchFilter<T> = Partial<Record<keyof T, unknown>>;
+
+export const buildFilter = <T>(obj: SearchFilter<T>) => {
+	return Object.fromEntries(
+		Object.entries(obj).filter(([_k, v]) => v !== undefined && v !== ""),
+	);
+};
+
 export const getAllTrain = handleAsyncErr(
-	async (req: Request, res: Response) => {
+	async (req: Request, res: Response): Promise<void> => {
 		const userId = req.cookies;
 		const currentDate_now = new Date();
 		const twelveDaysbehindDate = currentDate_now.setDate(
 			currentDate_now.getDate() - 12,
 		);
-		let allTrains: Object;
+		const { name, trainType: train_Types, coachType, seatCount } = req.query;
+		console.log(name, train_Types, coachType, seatCount);
+		let allTrains: Object | undefined | null;
 		if (userId.access_token.access_token) {
-			allTrains = await Trains.find().populate("route").populate("coaches");
+			allTrains = await Trains.find(buildFilter({ name, train_Types }))
+				.populate<ITrainRouteCreate>("route")
+				.populate<ITrainCoach>({
+					path: "coaches",
+					match: buildFilter({ coachType, seatCount }),
+				});
 		} else {
 			allTrains = await Trains.find({
 				createdAt: { $gte: twelveDaysbehindDate },
 			});
+
+			allTrains = await Trains.find(
+				{ createdAt: { $gte: twelveDaysbehindDate } },
+				buildFilter({ name, train_Types }),
+			)
+				.populate<ITrainRouteCreate>("route")
+				.populate<ITrainCoach>({
+					path: "coaches",
+					match: buildFilter({ coachType, seatCount }),
+				});
 		}
+		const objLength = Object.entries(allTrains).length;
+		const objFilter = Object.entries(allTrains).filter(
+			([_k, v]) => v.coaches !== null && v.coaches !== "",
+		);
 		res.status(200).json({
-			something: allTrains,
+			result: objLength,
+			something: objFilter,
 		});
 		return;
 	},

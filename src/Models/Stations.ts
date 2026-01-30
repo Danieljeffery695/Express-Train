@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { ITrainStation } from "../Utils/DataChecking";
 
-const stationSchema = new mongoose.Schema<Required<ITrainStation>>({
+const stationSchema = new mongoose.Schema<ITrainStation>({
     station_name: {type: String},
     code: {type: String},
     city: {type: String},
@@ -14,6 +14,6 @@ const stationSchema = new mongoose.Schema<Required<ITrainStation>>({
     },
 );
 
-const TrainStation = mongoose.model<Required<ITrainStation>>("Station", stationSchema);
+const TrainStation = mongoose.model<ITrainStation>("Station", stationSchema);
 
 export default TrainStation;

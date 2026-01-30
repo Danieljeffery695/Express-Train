@@ -4,7 +4,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ITrainSeats } from "../Utils/DataChecking";
 
-const seatSchema = new mongoose.Schema<Required<ITrainSeats>>(
+const seatSchema = new mongoose.Schema<ITrainSeats>(
     {
         coach: {
             type: Schema.Types.ObjectId,
@@ -32,6 +32,6 @@ const seatSchema = new mongoose.Schema<Required<ITrainSeats>>(
     },
 );
 
-const Seats = mongoose.model<Required<ITrainSeats>>("Seats", seatSchema);
+const Seats = mongoose.model<ITrainSeats>("Seats", seatSchema);
 
 export default Seats;

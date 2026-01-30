@@ -3,7 +3,7 @@ import type { Types } from "mongoose";
 import mongoose, { type HydratedDocument } from "mongoose";
 import type { IUserCreate } from "../Utils/DataChecking";
 
-const userSchema = new mongoose.Schema<Required<IUserCreate>>(
+const userSchema = new mongoose.Schema<IUserCreate>(
 	{
 		name: {
 			type: String,
@@ -134,6 +134,6 @@ userSchema.methods.compareLoginPassword = async (
 	userDbPwd: string,
 ): Promise<boolean> => await bcrypt.compare(currentInputPwd, userDbPwd);
 
-const Users = mongoose.model<Required<IUserCreate>>("Users", userSchema);
+const Users = mongoose.model<IUserCreate>("Users", userSchema);
 
 export default Users;

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import type { ITrainSchedule } from "../Utils/DataChecking";
 
-const trainSchedule = new mongoose.Schema<Required<ITrainSchedule>>(
+const trainSchedule = new mongoose.Schema<ITrainSchedule>(
 	{
 		train: {
 			type: Schema.Types.ObjectId,
@@ -30,6 +30,6 @@ const trainSchedule = new mongoose.Schema<Required<ITrainSchedule>>(
 	},
 );
 
-const TrainSchedule = mongoose.model<Required<ITrainSchedule>>("Schedule", trainSchedule);
+const TrainSchedule = mongoose.model<ITrainSchedule>("Schedule", trainSchedule);
 
 export default TrainSchedule;

@@ -103,7 +103,7 @@ export const getAllTrain = handleAsyncErr(
 		const { name, trainType: train_Types, coachType, seatCount } = req.query;
 		console.log(name, train_Types, coachType, seatCount);
 		let allTrains: Object | undefined | null;
-		if (userId.access_token.access_token) {
+		if (userId.access_token[0].access_token) {
 			allTrains = await Trains.find(buildFilter({ name, train_Types }))
 				.populate<ITrainRouteCreate>("route")
 				.populate<ITrainCoach>({
@@ -111,9 +111,6 @@ export const getAllTrain = handleAsyncErr(
 					match: buildFilter({ coachType, seatCount }),
 				});
 		} else {
-			allTrains = await Trains.find({
-				createdAt: { $gte: twelveDaysbehindDate },
-			});
 
 			allTrains = await Trains.find(
 				{ createdAt: { $gte: twelveDaysbehindDate } },
@@ -125,14 +122,20 @@ export const getAllTrain = handleAsyncErr(
 					match: buildFilter({ coachType, seatCount }),
 				});
 		}
-		const objLength = Object.entries(allTrains).length;
 		const objFilter = Object.entries(allTrains).filter(
 			([_k, v]) => v.coaches !== null && v.coaches !== "",
 		);
+
 		res.status(200).json({
-			result: objLength,
+			result: objFilter.length,
 			something: objFilter,
 		});
 		return;
 	},
 );
+
+export const updateTrain = handleAsyncErr( async (req: Request, res: Response): Promise<void> => {
+	// so..i will create a function to update many train documents at once...but i will start with update one
+	// so i will probably get an identity to track which train to update. obviously i will track specific train with their _id
+	// sent thought a proper route..maybe not the body but i will think of it.
+});

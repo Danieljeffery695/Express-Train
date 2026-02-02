@@ -83,8 +83,9 @@ export const getCurrentUser = handleAsyncErr(
 	async (req: Request, res: Response) => {
 		const [email, password]: Array<string> = res.locals.loginData;
 		const findUser = await Users.findOne({
-			email,
-		}).select("+password");
+			email
+		}).select(["password", "role", "AdminToken"]); // select data you wish to use. any data left out would not be added except mongo _id. 
+		// so if you want any data in use here in this function kindly select them out or else error might occur
 
 		if (
 			!findUser ||
@@ -95,10 +96,10 @@ export const getCurrentUser = handleAsyncErr(
 
 		const signupToken: Object | string | Types.ObjectId =
 			findUser.role === "superAdmin"
-				? {
-						access_token: createToken(findUser._id),
-						access_token_101: findUser.AdminToken,
-					}
+				?  [ 
+						{ access_token: createToken(findUser._id)},
+						{access_token_101: findUser.AdminToken}, 
+				   ]
 				: createToken(findUser._id);
 
 		res.cookie("access_token", signupToken, {

@@ -57,14 +57,14 @@ export const createUser = handleAsyncErr(
 
 		const signupToken: Object | string | Types.ObjectId =
 			newUser.role === "superAdmin"
-				? {
-						access_token: createToken(newUser._id),
-						access_token_101: newUser.AdminToken,
-					}
+				? [
+						{ access_token: createToken(newUser._id) },
+						{ access_token_101: newUser.AdminToken },
+					]
 				: createToken(newUser._id);
 
 		res.cookie("access_token", signupToken, {
-			httpOnly: true, 
+			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "strict",
 			maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -83,8 +83,8 @@ export const getCurrentUser = handleAsyncErr(
 	async (req: Request, res: Response) => {
 		const [email, password]: Array<string> = res.locals.loginData;
 		const findUser = await Users.findOne({
-			email
-		}).select(["password", "role", "AdminToken"]); // select data you wish to use. any data left out would not be added except mongo _id. 
+			email,
+		}).select(["password", "role", "AdminToken"]); // select data you wish to use. any data left out would not be added except mongo _id.
 		// so if you want any data in use here in this function kindly select them out or else error might occur
 
 		if (
@@ -96,10 +96,10 @@ export const getCurrentUser = handleAsyncErr(
 
 		const signupToken: Object | string | Types.ObjectId =
 			findUser.role === "superAdmin"
-				?  [ 
-						{ access_token: createToken(findUser._id)},
-						{access_token_101: findUser.AdminToken}, 
-				   ]
+				? [
+						{ access_token: createToken(findUser._id) },
+						{ access_token_101: findUser.AdminToken },
+					]
 				: createToken(findUser._id);
 
 		res.cookie("access_token", signupToken, {

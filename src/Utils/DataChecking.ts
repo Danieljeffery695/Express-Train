@@ -49,8 +49,8 @@ export interface ITrainCreate {
 	name: string;
 	number: string;
 	train_Types: string;
-	coaches: Types.ObjectId;
-	route: Types.ObjectId;
+	coaches: Types.ObjectId | ITrainCoach;
+	route: Types.ObjectId | ITrainRouteCreate;
 }
 
 export interface ITrainRouteCreate {
@@ -63,10 +63,10 @@ export interface ITrainRouteCreate {
 }
 
 export interface ITrainCoach {
-	train: Types.ObjectId;
+	train: Types.ObjectId | ITrainCreate;
 	coachType: string;
 	seatCount: number;
-	seats: Types.ObjectId;
+	seats: Types.ObjectId | ITrainSeats;
 }
 
 export interface ITrainStation {
@@ -78,7 +78,7 @@ export interface ITrainStation {
 }
 
 export interface ITrainSeats {
-	coach: Types.ObjectId;
+	coach: Types.ObjectId | ITrainCoach;
 	seat_number: string;
 	seat_type: string;
 	isWindow: boolean;
@@ -86,7 +86,7 @@ export interface ITrainSeats {
 }
 
 export interface ITrainSchedule {
-	train: Types.ObjectId;
+	train: Types.ObjectId | ITrainCreate;
 	date: Date;
 	departureTime: string;
 	arrivalTime: string;
@@ -100,9 +100,9 @@ export type passengersTypes = {
 }
 
 export interface ITrainBooking {
-	user: Types.ObjectId;
-	schedule: Types.ObjectId;
-	seats: Types.ObjectId;
+	user: Types.ObjectId | IUserCreate;
+	schedule: Types.ObjectId | ITrainSchedule;
+	seats: Types.ObjectId | ITrainSeats;
 	passengers: passengersTypes;
 	totalPrice: number;
 	status: string

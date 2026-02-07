@@ -1,5 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
-import type { Types } from "mongoose";
+import type {
+	Types,
+	UpdateResult,
+	UpdateWriteOpResult,
+} from "mongoose";
 import TrainCoach from "../Models/Coaches";
 import TrainStation from "../Models/Stations";
 import TrainRoute from "../Models/TrainRoute";
@@ -7,6 +11,7 @@ import Trains from "../Models/Trains";
 import { handleAsyncErr } from "../Utils/AsyncError";
 import type {
 	ITrainCoach,
+	ITrainCreate,
 	ITrainRouteCreate,
 	ITrainStation,
 } from "../Utils/DataChecking";
@@ -93,6 +98,29 @@ export const buildFilter = <T>(obj: SearchFilter<T>) => {
 	);
 };
 
+interface TrainFilter_Type {
+	coaches: Object | string;
+	createdAt: number;
+}
+
+let allTrains: Array<ITrainCreate> | undefined | null;
+let updateTrain1:
+	| Partial<ITrainCreate>
+	| UpdateWriteOpResult
+	| UpdateResult
+	| null;
+let updateCoach:
+	| Partial<ITrainCoach>
+	| UpdateWriteOpResult
+	| UpdateResult
+	| null;
+let updateStation:
+	| Partial<ITrainStation>
+	| UpdateWriteOpResult
+	| UpdateResult
+	| null;
+let deleteTrain1: Array<ITrainCreate> | undefined | null;
+
 export const getAllTrain = handleAsyncErr(
 	async (req: Request, res: Response): Promise<void> => {
 		const userId = req.cookies;
@@ -101,8 +129,6 @@ export const getAllTrain = handleAsyncErr(
 			currentDate_now.getDate() - 12,
 		);
 		const { name, trainType: train_Types, coachType, seatCount } = req.query;
-		console.log(name, train_Types, coachType, seatCount);
-		let allTrains: Object | undefined | null;
 		if (userId.access_token[0].access_token) {
 			allTrains = await Trains.find(buildFilter({ name, train_Types }))
 				.populate<ITrainRouteCreate>("route")
@@ -110,32 +136,86 @@ export const getAllTrain = handleAsyncErr(
 					path: "coaches",
 					match: buildFilter({ coachType, seatCount }),
 				});
+			var searchTrainFilter = (v: TrainFilter_Type) =>
+				v.coaches !== null && v.coaches !== "";
 		} else {
-
-			allTrains = await Trains.find(
-				{ createdAt: { $gte: twelveDaysbehindDate } },
-				buildFilter({ name, train_Types }),
-			)
+			allTrains = await Trains.find(buildFilter({ name, train_Types }))
 				.populate<ITrainRouteCreate>("route")
 				.populate<ITrainCoach>({
 					path: "coaches",
 					match: buildFilter({ coachType, seatCount }),
 				});
+			var searchTrainFilter = (v: TrainFilter_Type) =>
+				v.coaches !== null &&
+				v.coaches !== "" &&
+				v.createdAt > twelveDaysbehindDate;
 		}
-		const objFilter = Object.entries(allTrains).filter(
-			([_k, v]) => v.coaches !== null && v.coaches !== "",
+		const objFilter = Object.entries(allTrains).filter(([_k, v]) =>
+			searchTrainFilter(v),
 		);
 
 		res.status(200).json({
 			result: objFilter.length,
-			something: objFilter,
+			data: objFilter,
 		});
 		return;
 	},
 );
 
-export const updateTrain = handleAsyncErr( async (req: Request, res: Response): Promise<void> => {
-	// so..i will create a function to update many train documents at once...but i will start with update one
-	// so i will probably get an identity to track which train to update. obviously i will track specific train with their _id
-	// sent thought a proper route..maybe not the body but i will think of it.
-});
+export const updateTrain = handleAsyncErr(
+	async (req: Request, res: Response): Promise<void> => {
+		const paramId = req.params;
+		const userId = req.cookies;
+		const [
+			name,
+			number,
+			train_Types,
+			station_name,
+			code,
+			city,
+			state,
+			country,
+			coachType,
+			seatCount,
+		]: Array<string> = res.locals.updateTrainData;
+
+		if (userId.access_token[0].access_token) {
+			// Updating Trains collection
+
+			updateTrain1 = await Trains.findByIdAndUpdate(
+				paramId.id,
+				buildFilter({ name, number, train_Types }),
+			);
+
+			// Updating Train Coach collection
+
+			updateCoach = await TrainCoach.updateOne(
+				{ train: paramId.id },
+				buildFilter({ coachType, seatCount }),
+			);
+			// Query Train Route for station _Id
+
+			const trainRoute = await TrainRoute.find({ train: paramId.id }).populate(
+				"from",
+			);
+
+			// Updating Trains collection
+
+			updateStation = await TrainStation.updateOne(
+				{ _id: trainRoute[0].from._id },
+				buildFilter({ station_name, code, city, state, country }),
+			);
+		} else {
+			res.status(403).json({
+				result: "bad request",
+				something: "not authorized",
+			});
+			return;
+		}
+		res.status(200).json({
+			result: "Success",
+			data: updateTrain1,
+		});
+		return;
+	},
+);

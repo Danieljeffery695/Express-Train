@@ -1,9 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import type {
-	Types,
-	UpdateResult,
-	UpdateWriteOpResult,
-} from "mongoose";
+import type { Types, UpdateResult, UpdateWriteOpResult } from "mongoose";
 import TrainCoach from "../Models/Coaches";
 import TrainStation from "../Models/Stations";
 import TrainRoute from "../Models/TrainRoute";
@@ -98,28 +94,19 @@ export const buildFilter = <T>(obj: SearchFilter<T>) => {
 	);
 };
 
-interface TrainFilter_Type {
-	coaches: Object | string;
+interface TrainFilter_Type extends ITrainCreate {
+	createdAt?: number;
+}
+
+interface TrainFilter_Type1 extends ITrainCreate, TrainFilter_Type {
 	createdAt: number;
 }
 
-let allTrains: Array<ITrainCreate> | undefined | null;
-let updateTrain1:
-	| Partial<ITrainCreate>
-	| UpdateWriteOpResult
-	| UpdateResult
-	| null;
-let updateCoach:
-	| Partial<ITrainCoach>
-	| UpdateWriteOpResult
-	| UpdateResult
-	| null;
-let updateStation:
-	| Partial<ITrainStation>
-	| UpdateWriteOpResult
-	| UpdateResult
-	| null;
+let allTrains: Array<TrainFilter_Type> | undefined | null;
+
 let deleteTrain1: Array<ITrainCreate> | undefined | null;
+
+let searchTrainFilter: (v: any) => boolean;
 
 export const getAllTrain = handleAsyncErr(
 	async (req: Request, res: Response): Promise<void> => {
@@ -136,8 +123,8 @@ export const getAllTrain = handleAsyncErr(
 					path: "coaches",
 					match: buildFilter({ coachType, seatCount }),
 				});
-			var searchTrainFilter = (v: TrainFilter_Type) =>
-				v.coaches !== null && v.coaches !== "";
+			searchTrainFilter = (v: TrainFilter_Type) =>
+				v.coaches !== null && v.coaches !== undefined;
 		} else {
 			allTrains = await Trains.find(buildFilter({ name, train_Types }))
 				.populate<ITrainRouteCreate>("route")
@@ -145,11 +132,12 @@ export const getAllTrain = handleAsyncErr(
 					path: "coaches",
 					match: buildFilter({ coachType, seatCount }),
 				});
-			var searchTrainFilter = (v: TrainFilter_Type) =>
+			searchTrainFilter = (v: TrainFilter_Type1) =>
 				v.coaches !== null &&
-				v.coaches !== "" &&
+				v.coaches !== undefined &&
 				v.createdAt > twelveDaysbehindDate;
 		}
+
 		const objFilter = Object.entries(allTrains).filter(([_k, v]) =>
 			searchTrainFilter(v),
 		);
@@ -164,6 +152,21 @@ export const getAllTrain = handleAsyncErr(
 
 export const updateTrain = handleAsyncErr(
 	async (req: Request, res: Response): Promise<void> => {
+		let updateTrain1:
+			| Partial<ITrainCreate>
+			| UpdateWriteOpResult
+			| UpdateResult
+			| null;
+		let updateCoach:
+			| Partial<ITrainCoach>
+			| UpdateWriteOpResult
+			| UpdateResult
+			| null;
+		let updateStation:
+			| Partial<ITrainStation>
+			| UpdateWriteOpResult
+			| UpdateResult
+			| null;
 		const paramId = req.params;
 		const userId = req.cookies;
 		const [
@@ -215,6 +218,28 @@ export const updateTrain = handleAsyncErr(
 		res.status(200).json({
 			result: "Success",
 			data: updateTrain1,
+		});
+		return;
+	},
+);
+
+export const deleteTrain = handleAsyncErr(
+	async (req: Request, res: Response): Promise<void> => {
+		const paramId = req.params;
+		const userId = req.cookies;
+
+		if (userId.access_token[0].access_token) {
+			deleteTrain1 = await Trains.findByIdAndDelete(paramId.id);
+		} else {
+			res.status(403).json({
+				result: "bad request",
+				something: "not authorized",
+			});
+			return;
+		}
+		res.status(200).json({
+			result: "Success",
+			data: deleteTrain1,
 		});
 		return;
 	},

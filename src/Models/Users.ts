@@ -134,6 +134,21 @@ userSchema.methods.compareLoginPassword = async (
 	userDbPwd: string,
 ): Promise<boolean> => await bcrypt.compare(currentInputPwd, userDbPwd);
 
+userSchema.pre("findOne", async function() {
+	const doc = await this.model.find(
+			this.getFilter());
+
+	if(doc[0]?.role === "superAdmin" || doc[0]?.role === "admin" ) {
+		await this.model.updateOne(this.getFilter(), 
+
+			{
+				AdminToken: await bcrypt.hash(doc[0]._id.toString(), 16),
+				AdminTokenExpires: new Date().toDateString()
+			});
+	}
+
+});
+
 const Users = mongoose.model<IUserCreate>("Users", userSchema);
 
 export default Users;

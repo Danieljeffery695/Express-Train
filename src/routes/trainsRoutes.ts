@@ -9,14 +9,15 @@ import {
 	create_Train_Auth,
 	update_Train_Auth,
 } from "../middlewares/train_middleware";
+import { protectRoutes } from "../Controllers/AuthController";
 
 const trainRouter = Router();
 
-trainRouter.post("/api/v1/createTrain", create_Train_Auth, createTrain);
+trainRouter.post("/api/v1/createTrain", protectRoutes, create_Train_Auth, createTrain);
 
 trainRouter
-	.get("/api/v1/getTrains", getAllTrain)
-	.patch("/api/v1/updateTrain/:id", update_Train_Auth, updateTrain)
-	.delete("/api/v1/deleteTrain/:id", deleteTrain);
+	.get("/api/v1/getTrains", protectRoutes, getAllTrain)
+	.patch("/api/v1/updateTrain/:id", protectRoutes, update_Train_Auth, updateTrain)
+	.delete("/api/v1/deleteTrain/:id", protectRoutes, deleteTrain);
 
 export default trainRouter;

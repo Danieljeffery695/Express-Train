@@ -70,6 +70,8 @@ export const createUser = handleAsyncErr(
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
 
+		res.setHeader("Authorization", `Bearer ${createToken(newUser._id)}`);
+
 		res.status(201).json({
 			Status: "success",
 			auth: signupToken,
@@ -108,6 +110,9 @@ export const getCurrentUser = handleAsyncErr(
 			sameSite: "strict",
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
+
+
+		res.setHeader("Authorization", `Bearer ${createToken(findUser._id)}`);
 
 		res.status(201).json({
 			auth: signupToken,

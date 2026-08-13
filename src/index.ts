@@ -11,6 +11,7 @@ import express, {
 import { rateLimit } from "express-rate-limit";
 import session from "express-session";
 import helmet from "helmet";
+import cors from "cors";
 import dbConnection from "./Db/dbConnect";
 import trainRouter from "./routes/trainsRoutes";
 import userRouter from "./routes/userRoutes";
@@ -27,6 +28,7 @@ const limiter = rateLimit({
 });
 
 app.use(helmet());
+app.use(cors());
 app.use(limiter);
 app.use(cookieParser());
 app.use(express.json());
